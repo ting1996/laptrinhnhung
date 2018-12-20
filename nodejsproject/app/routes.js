@@ -73,10 +73,12 @@ module.exports = function(app, passport,io,info,ns,clients) {
         
       });
        socket.on('get user',function(temp){
+         let over;
          var index = findIndexUser(info,temp);
          if(index==-1)
            return 0;
          User.findOne({ 'local.email' :  temp }, function(err, user) {
+           over = user.isOver;
            var stateUser = findUserState(info,user.local.email)
            var enemyId = user.enemyId;
             var map_ta = new Array(8);
@@ -114,7 +116,7 @@ module.exports = function(app, passport,io,info,ns,clients) {
               }
              var stateEnemy = findUserState(info,usere.local.email)
              if(countdown!= null)
-                socket.emit('update tadich',map_ta,map_dich,info,index,user.isTurn,{countdown: countdown.countdown,User: stateUser, Enemy: stateEnemy});
+                socket.emit('update tadich',map_ta,map_dich,info,index,user.isTurn,{countdown: countdown.countdown,User: stateUser, Enemy: stateEnemy},over);
              });
              
          });
@@ -274,9 +276,11 @@ module.exports = function(app, passport,io,info,ns,clients) {
        socket.on('user fire',function(index){
            info[index].isFire=false;
            let check = true;
+           let over;
            User.findOne({ 'local.email' :  temp1 }, function(err, user) {
              if(user.isTurn)
              {
+              over = user.isOver
              var enemyId = user.enemyId;
              User.findOne({ '_id' :  enemyId }, function(err, usere) {
               for (let i = 0; i < usere.locateboat.length; i++) {
@@ -360,7 +364,7 @@ module.exports = function(app, passport,io,info,ns,clients) {
                                         var stateUser = findUserState(info,user.local.email)
                                         var stateEnemy = findUserState(info,usere.local.email)
                                         countdown.countdown=180;
-                                       socket.emit('update tadich',map_ta,map_dich,info,index,false,{countdown: countdown.countdown,User: stateUser, Enemy: stateEnemy});                     
+                                       socket.emit('update tadich',map_ta,map_dich,info,index,false,{countdown: countdown.countdown,User: stateUser, Enemy: stateEnemy},over);                     
                                       });
                                         
                                       });
