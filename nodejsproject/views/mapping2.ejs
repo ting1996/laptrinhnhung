@@ -174,7 +174,7 @@
         socket.emit('get user',user);
       }, 1000);
       
-      socket.on('update tadich',function(map_ta,map_dich,info,index_a,isTurn,state){
+      socket.on('update tadich',function(map_ta,map_dich,info,index_a,isTurn,state,over){
         ta=map_ta;
         dich =map_dich;
         index = index_a;
@@ -278,7 +278,9 @@
           }  
             
         }
-          if(state.countdown<0)
+        if(!over)
+        {
+          if(state.countdown==0)
           {
             if(this_turn)
             { 
@@ -311,6 +313,7 @@
           }
           if(info[index].isFire==true)
             socket.emit('user fire',index);
+        }
       });
       socket.on('update map', function(info){
           
