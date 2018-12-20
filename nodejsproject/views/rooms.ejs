@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>List room</title>
+  </head>
+  <body>
+    <h1>List room</h1>
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Room name</th>
+      <th scope="col">Players name</th>
+      <th scope="col">Status</th>
+      
+    </tr>
+  </thead>
+  <tbody id = "bodytable">
+    
+  </tbody>
+</table>
+<button type="button" onclick="createroom()" class="btn btn-primary btn-sm" style="float: right; margin-right :10px" >Create room</button>
+<button type="button" onclick="backlistboard()" class="btn btn-primary btn-sm" style="float: right; margin-right : 10px" >Back listboard</button>
+<p id = "test"><%=useraut%></p>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io('/listboard');
+      
+
+      var username = document.getElementById('test').innerHTML;
+      document.getElementById('test').innerHTML='';
+      document.getElementById('test').innerHTML+=",,";
+      socket.emit("connect rooms");
+      socket.on("update rooms",function(rooms,info)
+      {
+          console.log("aaaa");
+          
+          for(let i = 0;i<rooms.length;i++)
+          {
+              let statter=false;
+            let state = '';
+            let status = 'Join room';
+            let playernames='';
+            for(let j = 0;j<info.length;j++)
+            {
+                if(info[j].room == rooms[i].room)
+                {
+                    if (playernames!='')
+                    {
+                        playernames +=", ";
+                        state = 'disabled';
+                        status = 'Room full';
+                    }
+                    playernames+=info[j].user;
+                }
+                if(username == info[j].user)
+                {
+                    console.log(info[j].room);
+                    console.log(info[j].room == rooms[i].room)
+                    console.log(rooms[i].room);
+                    if(info[j].room == null)
+                    state = '';
+                    else if(info[j].room == rooms[i].room)
+                    {
+                        statter=true;
+                        console.log("aaaa");
+                        state = '';
+                    }
+                    else if(info[j].room != rooms[i].room)
+                    state = 'disabled'; 
+                }         
+            }
+            console.log(state);
+            if(statter)
+            {
+                state = '';
+                statter=false;
+            } 
+            let num = 0;
+            for(let j = 5;j<rooms[i].room.length;j++)
+            {
+                num = num*10 + parseInt(rooms[i].room[j])
+            }
+            document.getElementById('bodytable').innerHTML +='<tr><th scope=\"row\">'+(i+1)+'</th><td>'+rooms[i].room+'</td><td>'+playernames+'</td><td><button type=\"button\" onclick=\"joinroom('+num+')\" class=\"btn btn-primary btn-sm\" '+state+'>'+status+'</button></td></tr>';
+          }
+      });
+      
+              
+
+    </script>
+    <script>
+        function backlistboard()
+        {
+            socket.emit("backlistboard",username);
+            window.location.href="/listboard";
+        }
+        function createroom()
+        {
+            socket.emit("create room",username);
+            setTimeout(function(){
+                window.location.href="/mapping2";
+            },500)
+            
+        }
+        function joinroom(num)
+        {
+            let roomname ="room " + num;
+            console.log(roomname);
+            
+            socket.emit("join room",username,roomname);
+            setTimeout(function(){
+                window.location.href="/mapping2";
+            },500)
+        }
+    </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    
+  </body>
+</html>
